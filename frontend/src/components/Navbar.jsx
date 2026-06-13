@@ -72,7 +72,10 @@ export default function Navbar() {
                     <img
                       src={getAvatarUrl(user._id)}
                       alt={user.name}
-                      onError={e => { e.target.style.display='none'; }}
+                      onError={e => { 
+                        e.target.style.display='none';
+                        console.error('Navbar avatar failed to load:', getAvatarUrl(user._id));
+                      }}
                     />
                   ) : (
                     <span>{user.name[0].toUpperCase()}</span>

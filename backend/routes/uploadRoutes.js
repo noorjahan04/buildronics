@@ -50,7 +50,7 @@ router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) 
       message: 'Profile picture updated successfully',
       success: true,
       user: user.toJSON(),
-      // Return download URL for avatar
+      // Return download URL for avatar (relative path that will be resolved by frontend)
       avatarUrl: `/api/upload/avatar/${req.user._id}`
     });
   } catch (err) {
@@ -65,29 +65,38 @@ router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) 
  */
 router.get('/avatar/:userId', async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId);
+    const user = await User.findById(req.params.userId).lean();
     
     if (!user) {
       return res.status(404).json({ message: 'User not found' });
     }
 
     if (!user.avatar || !user.avatar.data) {
+      // No avatar - return 404
       return res.status(404).json({ message: 'Avatar not found' });
     }
 
     // Ensure avatar.data is a Buffer
     let avatarBuffer = user.avatar.data;
-    if (typeof avatarBuffer === 'string') {
+    
+    // If it's a Mongoose Binary type, convert to Buffer
+    if (avatarBuffer && typeof avatarBuffer === 'object' && avatarBuffer.buffer) {
+      avatarBuffer = Buffer.from(avatarBuffer.buffer);
+    } else if (typeof avatarBuffer === 'string') {
       avatarBuffer = Buffer.from(avatarBuffer, 'binary');
+    } else if (!Buffer.isBuffer(avatarBuffer)) {
+      avatarBuffer = Buffer.from(avatarBuffer);
     }
 
-    res.set('Content-Type', user.avatar.contentType || 'image/jpeg');
-    res.set('Cache-Control', 'max-age=86400'); // Cache for 24 hours
+    const contentType = user.avatar.contentType || 'image/jpeg';
+    
+    res.set('Content-Type', contentType);
+    res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
     res.set('Access-Control-Allow-Origin', '*');
     res.send(avatarBuffer);
   } catch (err) {
     console.error('Avatar retrieval error:', err);
-    res.status(500).json({ message: err.message });
+    res.status(500).json({ message: 'Error retrieving avatar: ' + err.message });
   }
 });
 

@@ -107,7 +107,12 @@ export default function ProfilePage() {
                   src={avatarPreview}
                   alt={user?.name}
                   className="profile-avatar-img"
-                  onError={e => { e.target.onerror = null; setAvatarPreview(''); }}
+                  onError={e => { 
+                    console.error('Avatar image failed to load from:', avatarPreview);
+                    e.target.onerror = null; 
+                    setAvatarPreview(''); 
+                  }}
+                  onLoad={() => console.log('Avatar loaded successfully from:', avatarPreview)}
                 />
               ) : (
                 <div className="profile-avatar-initials">{initials}</div>

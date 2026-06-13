@@ -44,6 +44,10 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 userSchema.methods.toJSON = function() {
   const obj = this.toObject();
   delete obj.password;
+  // Don't include binary buffer in JSON responses
+  if (obj.avatar && obj.avatar.data) {
+    delete obj.avatar.data;
+  }
   return obj;
 };
 
