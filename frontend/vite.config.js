@@ -7,12 +7,12 @@ export default defineConfig({
     port: 5173,
     proxy: {
       '/api': {
-        target: 'http://localhost:5000',
+        target: 'https://buildronics.onrender.com',
         changeOrigin: true,
       },
       // ✅ Proxy /uploads so frontend can load images uploaded to backend
       '/uploads': {
-        target: 'http://localhost:5000',
+        target: 'https://buildronics.onrender.com',
         changeOrigin: true,
       },
     },

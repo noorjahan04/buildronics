@@ -67,7 +67,7 @@ export default function AdminProducts() {
         headers: { 'Content-Type': 'multipart/form-data' },
       });
       setForm(f => ({ ...f, image: data.imageUrl }));
-      setImagePreview(data.fullUrl || `http://localhost:5000${data.imageUrl}`);
+      setImagePreview(data.fullUrl || `https://buildronics.onrender.com${data.imageUrl}`);
       toast.success('Image uploaded!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Upload failed');

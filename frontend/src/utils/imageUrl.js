@@ -2,11 +2,11 @@
  * Resolves any server image path or external URL to a full displayable URL.
  *
  * - Full https:// URL  → returned as-is
- * - /uploads/... path  → prepends API base (http://localhost:5000)
+ * - /uploads/... path  → prepends API base (https://buildronics.onrender.com)
  * - empty / null       → returns category fallback for products, empty string for avatars
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+const API_BASE = import.meta.env.VITE_API_URL || 'https://buildronics.onrender.com';
 
 const PRODUCT_FALLBACKS = {
   'Microcontrollers': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80',

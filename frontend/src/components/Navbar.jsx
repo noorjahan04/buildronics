@@ -69,7 +69,7 @@ export default function Navbar() {
                 <div className="user-avatar">
                   {user.avatar ? (
                     <img
-                      src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'http://localhost:5000'}${user.avatar}`}
+                      src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://buildronics.onrender.com'}${user.avatar}`}
                       alt={user.name}
                       onError={e => { e.target.style.display='none'; }}
                     />
