@@ -27,15 +27,13 @@ export function getImageUrl(image, collection = '') {
 }
 
 /**
- * For avatar images — avatarUrl should be the full API endpoint: /api/upload/avatar/:userId
+ * For avatar images — receives user ID and returns full API endpoint URL
  * Returns empty string when not set (so initials render instead)
  */
 export function getAvatarUrl(userId) {
   if (!userId) return '';
-  // avatarUrl is the API endpoint path
-  if (userId.startsWith('/api/upload/avatar/')) {
-    return `${API_BASE}${userId}`;
-  }
-  // If userId is passed (the user ID), construct the endpoint
+  // If it's already a full URL, return it
+  if (userId.startsWith('http://') || userId.startsWith('https://')) return userId;
+  // Otherwise construct the endpoint from user ID
   return `${API_BASE}/api/upload/avatar/${userId}`;
 }

@@ -50,8 +50,8 @@ router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) 
       message: 'Profile picture updated successfully',
       success: true,
       user: user.toJSON(),
-      // Return download URL for avatar (relative path that will be resolved by frontend)
-      avatarUrl: `/api/upload/avatar/${req.user._id}`
+      // Return just the user ID so frontend can construct the URL
+      avatarUrl: req.user._id.toString()
     });
   } catch (err) {
     console.error('Avatar upload error:', err);
