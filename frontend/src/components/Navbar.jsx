@@ -70,7 +70,7 @@ export default function Navbar() {
                 <div className="user-avatar">
                   {user.avatar && typeof user.avatar === 'string' ? (
                     <img
-                      src={getAvatarUrl(user.avatar)}
+                      src={`${getAvatarUrl(user.avatar)}?t=${Date.now()}`}
                       alt={user.name}
                       onError={(e) => {
                         e.target.style.display = 'none';

@@ -16,12 +16,12 @@ export default function ProfilePage() {
   const fileRef = useRef();
 
   const [form, setForm] = useState({
-    name:    user?.name  || '',
-    phone:   user?.phone || '',
+    name: user?.name || '',
+    phone: user?.phone || '',
     address: {
-      street:  user?.address?.street  || '',
-      city:    user?.address?.city    || '',
-      state:   user?.address?.state   || '',
+      street: user?.address?.street || '',
+      city: user?.address?.city || '',
+      state: user?.address?.state || '',
       pincode: user?.address?.pincode || '',
     },
   });
@@ -46,7 +46,10 @@ export default function ProfilePage() {
       });
       // Update context so Navbar also reflects change immediately
       updateUser(data.user);
-      setAvatarPreview(getAvatarUrl(data.avatarUrl));
+
+      const freshAvatar = `${getAvatarUrl(data.avatarUrl)}?t=${Date.now()}`;
+      setAvatarPreview(freshAvatar);
+
       toast.success('Profile picture updated!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Upload failed');
@@ -77,7 +80,7 @@ export default function ProfilePage() {
   const savePassword = async (e) => {
     e.preventDefault();
     if (pwForm.password !== pwForm.confirm) { toast.error('Passwords do not match'); return; }
-    if (pwForm.password.length < 6)         { toast.error('Min 6 characters'); return; }
+    if (pwForm.password.length < 6) { toast.error('Min 6 characters'); return; }
     setSaving(true);
     try {
       await API.put('/auth/profile', { password: pwForm.password });
@@ -123,8 +126,8 @@ export default function ProfilePage() {
                   <div className="spinner" style={{ width: 14, height: 14, borderColor: '#fff3', borderTopColor: '#fff' }} />
                 ) : (
                   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
-                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
-                    <circle cx="12" cy="13" r="4"/>
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
                   </svg>
                 )}
               </button>
@@ -139,7 +142,7 @@ export default function ProfilePage() {
               style={{ display: 'none' }}
             />
 
-            <p className="avatar-hint">Click camera icon to change photo<br/><span>JPG, PNG, WebP · max 3 MB</span></p>
+            <p className="avatar-hint">Click camera icon to change photo<br /><span>JPG, PNG, WebP · max 3 MB</span></p>
           </div>
 
           <div className="profile-user-info">
