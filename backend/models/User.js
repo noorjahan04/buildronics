@@ -13,7 +13,11 @@ const userSchema = new mongoose.Schema({
     pincode: { type: String, default: '' }
   },
   isAdmin: { type: Boolean, default: false },
-  avatar: { type: String, default: '' },
+  avatar: {
+    data: Buffer,
+    contentType: String,
+    uploadedAt: Date
+  },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
 }, { timestamps: true });
 

@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
+import { getAvatarUrl } from '../utils/imageUrl';
 import './Navbar.css';
 
 export default function Navbar() {
@@ -67,9 +68,9 @@ export default function Navbar() {
             <div className="user-menu-wrap">
               <button className="user-btn" onClick={() => setUserMenuOpen(!userMenuOpen)}>
                 <div className="user-avatar">
-                  {user.avatar ? (
+                  {user._id ? (
                     <img
-                      src={user.avatar.startsWith('http') ? user.avatar : `${import.meta.env.VITE_API_URL || 'https://buildronics.onrender.com'}${user.avatar}`}
+                      src={getAvatarUrl(user._id)}
                       alt={user.name}
                       onError={e => { e.target.style.display='none'; }}
                     />

@@ -6,24 +6,14 @@ const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const User = require('../models/User');
 
-// Separate multer config for avatars (saved to /uploads/avatars/)
+// ===========================
+// Avatar Upload (MongoDB)
+// ===========================
 const multer = require('multer');
 
-const avatarStorage = multer.diskStorage({
-  destination(req, file, cb) {
-    const dir = path.join(__dirname, '..', 'uploads', 'avatars');
-    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
-    cb(null, dir);
-  },
-  filename(req, file, cb) {
-    // e.g. avatar-userId-timestamp.jpg  — one file per user keeps storage clean
-    const ext = path.extname(file.originalname).toLowerCase();
-    cb(null, `avatar-${req.user._id}${ext}`);
-  },
-});
-
+// Memory storage for avatars — saves file buffer to MongoDB
 const avatarUpload = multer({
-  storage: avatarStorage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB max
   fileFilter(req, file, cb) {
     const ok = /jpeg|jpg|png|gif|webp/.test(path.extname(file.originalname).toLowerCase());
@@ -33,30 +23,56 @@ const avatarUpload = multer({
 
 /**
  * POST /api/upload/avatar
- * Upload logged-in user's profile picture.
+ * Upload logged-in user's profile picture to MongoDB.
  * Body: form-data  →  key: "avatar"  type: File
- * Returns: { avatarUrl: "/uploads/avatars/avatar-userId.jpg" }
+ * Returns: { success: true, message, user }
  */
 router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file provided. Use form-data key "avatar".' });
     }
-    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
 
-    // Save to user document
+    // Save file buffer directly to MongoDB
     const user = await User.findByIdAndUpdate(
       req.user._id,
-      { avatar: avatarUrl },
+      {
+        avatar: {
+          data: req.file.buffer,
+          contentType: req.file.mimetype,
+          uploadedAt: new Date()
+        }
+      },
       { new: true }
     );
 
     res.json({
-      message: 'Profile picture updated',
-      avatarUrl,
-      fullUrl: `${req.protocol}://${req.get('host')}${avatarUrl}`,
-      user,
+      message: 'Profile picture updated successfully',
+      success: true,
+      user: user.toJSON(),
+      // Return download URL for avatar
+      avatarUrl: `/api/upload/avatar/${req.user._id}`
     });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+/**
+ * GET /api/upload/avatar/:userId
+ * Retrieve user's avatar from MongoDB
+ */
+router.get('/avatar/:userId', async (req, res) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    
+    if (!user || !user.avatar || !user.avatar.data) {
+      return res.status(404).json({ message: 'Avatar not found' });
+    }
+
+    res.set('Content-Type', user.avatar.contentType);
+    res.set('Cache-Control', 'max-age=86400'); // Cache for 24 hours
+    res.send(user.avatar.data);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }

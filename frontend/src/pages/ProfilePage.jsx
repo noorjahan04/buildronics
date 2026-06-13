@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(
-    user?.avatar ? getAvatarUrl(user.avatar) : ''
+    user?._id ? getAvatarUrl(user._id) : ''
   );
   const fileRef = useRef();
 
@@ -46,12 +46,13 @@ export default function ProfilePage() {
       });
       // Update context so Navbar also reflects change immediately
       updateUser(data.user);
+      // Use the new avatar endpoint
       setAvatarPreview(getAvatarUrl(data.avatarUrl));
       toast.success('Profile picture updated!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Upload failed');
       // Revert preview on error
-      setAvatarPreview(user?.avatar ? getAvatarUrl(user.avatar) : '');
+      setAvatarPreview(user?._id ? getAvatarUrl(user._id) : '');
     } finally {
       setUploadingAvatar(false);
     }
