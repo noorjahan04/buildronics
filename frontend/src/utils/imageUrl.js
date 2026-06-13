@@ -6,7 +6,7 @@
  * - empty / null       → returns category fallback for products, empty string for avatars
  */
 
-const API_BASE = import.meta.env.VITE_API_URL || 'https://buildronics.onrender.com';
+const API_BASE = 'https://buildronics.onrender.com';
 
 const PRODUCT_FALLBACKS = {
   'Microcontrollers': 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=400&q=80',
