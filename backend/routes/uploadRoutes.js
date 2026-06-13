@@ -33,18 +33,18 @@ router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) 
       return res.status(400).json({ message: 'No file provided. Use form-data key "avatar".' });
     }
 
-    // Save file buffer directly to MongoDB
-    const user = await User.findByIdAndUpdate(
-      req.user._id,
-      {
-        avatar: {
-          data: req.file.buffer,
-          contentType: req.file.mimetype,
-          uploadedAt: new Date()
-        }
-      },
-      { new: true }
-    );
+    // Fetch user and update avatar
+    const user = await User.findById(req.user._id);
+    
+    user.avatar = {
+      data: req.file.buffer,
+      contentType: req.file.mimetype,
+      uploadedAt: new Date()
+    };
+    
+    // Mark the avatar field as modified so Mongoose saves it
+    user.markModified('avatar');
+    await user.save();
 
     res.json({
       message: 'Profile picture updated successfully',
@@ -54,6 +54,7 @@ router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) 
       avatarUrl: `/api/upload/avatar/${req.user._id}`
     });
   } catch (err) {
+    console.error('Avatar upload error:', err);
     res.status(500).json({ message: err.message });
   }
 });
@@ -66,14 +67,26 @@ router.get('/avatar/:userId', async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     
-    if (!user || !user.avatar || !user.avatar.data) {
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    if (!user.avatar || !user.avatar.data) {
       return res.status(404).json({ message: 'Avatar not found' });
     }
 
-    res.set('Content-Type', user.avatar.contentType);
+    // Ensure avatar.data is a Buffer
+    let avatarBuffer = user.avatar.data;
+    if (typeof avatarBuffer === 'string') {
+      avatarBuffer = Buffer.from(avatarBuffer, 'binary');
+    }
+
+    res.set('Content-Type', user.avatar.contentType || 'image/jpeg');
     res.set('Cache-Control', 'max-age=86400'); // Cache for 24 hours
-    res.send(user.avatar.data);
+    res.set('Access-Control-Allow-Origin', '*');
+    res.send(avatarBuffer);
   } catch (err) {
+    console.error('Avatar retrieval error:', err);
     res.status(500).json({ message: err.message });
   }
 });

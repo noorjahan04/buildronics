@@ -14,9 +14,18 @@ const userSchema = new mongoose.Schema({
   },
   isAdmin: { type: Boolean, default: false },
   avatar: {
-    data: Buffer,
-    contentType: String,
-    uploadedAt: Date
+    data: {
+      type: Buffer,
+      default: null
+    },
+    contentType: {
+      type: String,
+      default: null
+    },
+    uploadedAt: {
+      type: Date,
+      default: null
+    }
   },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
 }, { timestamps: true });
