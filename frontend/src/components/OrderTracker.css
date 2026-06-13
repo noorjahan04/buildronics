@@ -1,0 +1,93 @@
+.order-tracker { padding: 20px 0; }
+
+.tracker-steps {
+  display: flex;
+  align-items: flex-start;
+  gap: 0;
+  overflow-x: auto;
+  padding-bottom: 10px;
+}
+.tracker-step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  flex: 1;
+  min-width: 80px;
+  position: relative;
+  opacity: 0.35;
+  transition: opacity 0.2s;
+}
+.tracker-step.done, .tracker-step.active { opacity: 1; }
+
+.step-icon-wrap {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  position: relative;
+}
+.step-icon {
+  width: 36px; height: 36px;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg-alt);
+  border: 2px solid var(--border);
+  border-radius: 50%;
+  font-size: 16px;
+  z-index: 1;
+  flex-shrink: 0;
+  transition: all 0.2s;
+  margin: 0 auto;
+}
+.tracker-step.done .step-icon { border-color: var(--green); background: var(--green-light); }
+.tracker-step.active .step-icon { border-color: var(--accent); background: var(--accent-light); transform: scale(1.15); box-shadow: 0 0 0 4px var(--accent-light); }
+
+.step-line {
+  flex: 1;
+  height: 2px;
+  background: var(--border);
+  position: absolute;
+  left: 50%;
+  right: -50%;
+  top: 17px;
+  z-index: 0;
+}
+.step-line.done { background: var(--green); }
+
+.step-label {
+  font-size: 11px;
+  color: var(--text-3);
+  text-align: center;
+  margin-top: 8px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+.tracker-step.active .step-label { color: var(--accent); font-weight: 700; }
+.tracker-step.done .step-label { color: var(--green); }
+
+/* Events */
+.tracking-events { margin-top: 28px; }
+.tracking-events h4 { font-size: 14px; font-weight: 600; margin-bottom: 14px; }
+.events-list { display: flex; flex-direction: column; }
+.event-item {
+  display: flex;
+  gap: 12px;
+  padding: 12px 0;
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.event-item:last-child { border-bottom: none; }
+.event-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  flex-shrink: 0;
+  margin-top: 6px;
+}
+.event-content { flex: 1; }
+.event-status { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.event-meta {
+  display: flex;
+  gap: 12px;
+  font-size: 12px;
+  color: var(--text-3);
+  font-family: var(--font-mono);
+}

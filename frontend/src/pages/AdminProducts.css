@@ -1,0 +1,76 @@
+.product-form-card { margin-bottom: 24px; }
+.product-form-card h3 { font-size: 16px; margin-bottom: 20px; padding-bottom: 12px; border-bottom: 1px solid var(--border); }
+
+/* Image upload section */
+.image-upload-section {
+  display: grid;
+  grid-template-columns: 160px 1fr;
+  gap: 20px;
+  align-items: flex-start;
+  padding: 16px;
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+}
+.image-preview-box {
+  width: 160px; height: 160px;
+  border-radius: var(--radius-lg);
+  border: 1.5px solid var(--border);
+  overflow: hidden;
+  background: var(--surface);
+  flex-shrink: 0;
+}
+.image-preview-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.no-image-placeholder {
+  width: 100%; height: 100%;
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  color: var(--text-3);
+  gap: 6px;
+}
+.no-image-placeholder span { font-size: 32px; }
+.no-image-placeholder p { font-size: 12px; }
+
+.image-input-area { display: flex; flex-direction: column; gap: 12px; }
+.image-mode-tabs { display: flex; gap: 6px; }
+.mode-tab {
+  padding: 7px 14px;
+  border: 1.5px solid var(--border);
+  background: var(--surface);
+  border-radius: 6px;
+  font-size: 13px;
+  cursor: pointer;
+  font-family: var(--font-sans);
+  color: var(--text-2);
+  transition: all 0.15s;
+}
+.mode-tab:hover { border-color: var(--accent); color: var(--accent); }
+.mode-tab.active { background: var(--accent); border-color: var(--accent); color: white; font-weight: 600; }
+
+.file-drop-zone {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 20px;
+  border: 2px dashed var(--border);
+  border-radius: var(--radius-lg);
+  cursor: pointer;
+  transition: all 0.2s;
+  background: var(--surface);
+  min-height: 100px;
+  text-align: center;
+}
+.file-drop-zone:hover { border-color: var(--accent); background: var(--accent-light); }
+.file-drop-zone p { font-size: 13px; color: var(--text-2); margin: 0; }
+
+.field-hint { font-size: 11.5px; color: var(--text-3); margin-top: 4px; }
+.upload-success-note { font-size: 12px; color: var(--green); background: var(--green-light); padding: 6px 10px; border-radius: 5px; }
+.upload-success-note .mono { font-size: 11px; }
+
+.product-form { display: flex; flex-direction: column; gap: 16px; }
+
+@media (max-width: 600px) {
+  .image-upload-section { grid-template-columns: 1fr; }
+  .image-preview-box { width: 100%; height: 200px; }
+}
