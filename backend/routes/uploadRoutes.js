@@ -6,14 +6,24 @@ const { protect, admin } = require('../middleware/authMiddleware');
 const upload = require('../middleware/uploadMiddleware');
 const User = require('../models/User');
 
-// ===========================
-// Avatar Upload (MongoDB)
-// ===========================
+// Separate multer config for avatars (saved to /uploads/avatars/)
 const multer = require('multer');
 
-// Memory storage for avatars — saves file buffer to MongoDB
+const avatarStorage = multer.diskStorage({
+  destination(req, file, cb) {
+    const dir = path.join(__dirname, '..', 'uploads', 'avatars');
+    if (!fs.existsSync(dir)) fs.mkdirSync(dir, { recursive: true });
+    cb(null, dir);
+  },
+  filename(req, file, cb) {
+    // e.g. avatar-userId-timestamp.jpg  — one file per user keeps storage clean
+    const ext = path.extname(file.originalname).toLowerCase();
+    cb(null, `avatar-${req.user._id}${ext}`);
+  },
+});
+
 const avatarUpload = multer({
-  storage: multer.memoryStorage(),
+  storage: avatarStorage,
   limits: { fileSize: 3 * 1024 * 1024 }, // 3 MB max
   fileFilter(req, file, cb) {
     const ok = /jpeg|jpg|png|gif|webp/.test(path.extname(file.originalname).toLowerCase());
@@ -23,80 +33,32 @@ const avatarUpload = multer({
 
 /**
  * POST /api/upload/avatar
- * Upload logged-in user's profile picture to MongoDB.
+ * Upload logged-in user's profile picture.
  * Body: form-data  →  key: "avatar"  type: File
- * Returns: { success: true, message, user }
+ * Returns: { avatarUrl: "/uploads/avatars/avatar-userId.jpg" }
  */
 router.post('/avatar', protect, avatarUpload.single('avatar'), async (req, res) => {
   try {
     if (!req.file) {
       return res.status(400).json({ message: 'No file provided. Use form-data key "avatar".' });
     }
+    const avatarUrl = `/uploads/avatars/${req.file.filename}`;
 
-    // Fetch user and update avatar
-    const user = await User.findById(req.user._id);
-    
-    user.avatar = {
-      data: req.file.buffer,
-      contentType: req.file.mimetype,
-      uploadedAt: new Date()
-    };
-    
-    // Mark the avatar field as modified so Mongoose saves it
-    user.markModified('avatar');
-    await user.save();
+    // Save to user document
+    const user = await User.findByIdAndUpdate(
+      req.user._id,
+      { avatar: avatarUrl },
+      { new: true }
+    );
 
     res.json({
-      message: 'Profile picture updated successfully',
-      success: true,
-      user: user.toJSON(),
-      // Return just the user ID so frontend can construct the URL
-      avatarUrl: req.user._id.toString()
+      message: 'Profile picture updated',
+      avatarUrl,
+      fullUrl: `${req.protocol}://${req.get('host')}${avatarUrl}`,
+      user,
     });
   } catch (err) {
-    console.error('Avatar upload error:', err);
     res.status(500).json({ message: err.message });
-  }
-});
-
-/**
- * GET /api/upload/avatar/:userId
- * Retrieve user's avatar from MongoDB
- */
-router.get('/avatar/:userId', async (req, res) => {
-  try {
-    const user = await User.findById(req.params.userId).lean();
-    
-    if (!user) {
-      return res.status(404).json({ message: 'User not found' });
-    }
-
-    if (!user.avatar || !user.avatar.data) {
-      // No avatar - return 404
-      return res.status(404).json({ message: 'Avatar not found' });
-    }
-
-    // Ensure avatar.data is a Buffer
-    let avatarBuffer = user.avatar.data;
-    
-    // If it's a Mongoose Binary type, convert to Buffer
-    if (avatarBuffer && typeof avatarBuffer === 'object' && avatarBuffer.buffer) {
-      avatarBuffer = Buffer.from(avatarBuffer.buffer);
-    } else if (typeof avatarBuffer === 'string') {
-      avatarBuffer = Buffer.from(avatarBuffer, 'binary');
-    } else if (!Buffer.isBuffer(avatarBuffer)) {
-      avatarBuffer = Buffer.from(avatarBuffer);
-    }
-
-    const contentType = user.avatar.contentType || 'image/jpeg';
-    
-    res.set('Content-Type', contentType);
-    res.set('Cache-Control', 'public, max-age=86400'); // Cache for 24 hours
-    res.set('Access-Control-Allow-Origin', '*');
-    res.send(avatarBuffer);
-  } catch (err) {
-    console.error('Avatar retrieval error:', err);
-    res.status(500).json({ message: 'Error retrieving avatar: ' + err.message });
   }
 });
 

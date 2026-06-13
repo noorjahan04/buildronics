@@ -13,20 +13,7 @@ const userSchema = new mongoose.Schema({
     pincode: { type: String, default: '' }
   },
   isAdmin: { type: Boolean, default: false },
-  avatar: {
-    data: {
-      type: Buffer,
-      default: null
-    },
-    contentType: {
-      type: String,
-      default: null
-    },
-    uploadedAt: {
-      type: Date,
-      default: null
-    }
-  },
+  avatar: { type: String, default: '' },
   wishlist: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Product' }]
 }, { timestamps: true });
 
@@ -44,10 +31,6 @@ userSchema.methods.matchPassword = async function(enteredPassword) {
 userSchema.methods.toJSON = function() {
   const obj = this.toObject();
   delete obj.password;
-  // Don't include binary buffer in JSON responses
-  if (obj.avatar && obj.avatar.data) {
-    delete obj.avatar.data;
-  }
   return obj;
 };
 

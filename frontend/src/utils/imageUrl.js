@@ -2,8 +2,8 @@
  * Resolves any server image path or external URL to a full displayable URL.
  *
  * - Full https:// URL  → returned as-is
- * - /api/upload/... path  → returned as-is (already full URL)
- * - empty / null       → returns empty string for avatars
+ * - /uploads/... path  → prepends API base (https://buildronics.onrender.com)
+ * - empty / null       → returns category fallback for products, empty string for avatars
  */
 
 const API_BASE = import.meta.env.VITE_API_URL || 'https://buildronics.onrender.com';
@@ -27,13 +27,11 @@ export function getImageUrl(image, collection = '') {
 }
 
 /**
- * For avatar images — receives user ID and returns full API endpoint URL
- * Returns empty string when not set (so initials render instead)
+ * For avatar images — returns empty string when not set (so initials render instead)
  */
-export function getAvatarUrl(userId) {
-  if (!userId) return '';
-  // If it's already a full URL, return it
-  if (userId.startsWith('http://') || userId.startsWith('https://')) return userId;
-  // Otherwise construct the endpoint from user ID
-  return `${API_BASE}/api/upload/avatar/${userId}`;
+export function getAvatarUrl(avatar) {
+  if (!avatar) return '';
+  if (avatar.startsWith('http://') || avatar.startsWith('https://')) return avatar;
+  if (avatar.startsWith('/')) return `${API_BASE}${avatar}`;
+  return `${API_BASE}/uploads/avatars/${avatar}`;
 }

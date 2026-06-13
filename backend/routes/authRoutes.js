@@ -29,6 +29,13 @@ router.post('/login', async (req, res) => {
     if (!user || !(await user.matchPassword(password))) {
       return res.status(401).json({ message: 'Invalid email or password' });
     }
+    
+    // Cleanup: if avatar is not a string (old MongoDB format), reset it
+    if (user.avatar && typeof user.avatar !== 'string') {
+      user.avatar = '';
+      await user.save();
+    }
+    
     res.json({ user, token: generateToken(user._id) });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -37,7 +44,19 @@ router.post('/login', async (req, res) => {
 
 // Get profile
 router.get('/profile', protect, async (req, res) => {
-  res.json(req.user);
+  try {
+    const user = await User.findById(req.user._id);
+    
+    // Cleanup: if avatar is not a string (old MongoDB format), reset it
+    if (user && user.avatar && typeof user.avatar !== 'string') {
+      user.avatar = '';
+      await user.save();
+    }
+    
+    res.json(user);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
 });
 
 // Update profile
@@ -48,6 +67,12 @@ router.put('/profile', protect, async (req, res) => {
     user.phone = req.body.phone || user.phone;
     user.address = req.body.address || user.address;
     if (req.body.password) user.password = req.body.password;
+    
+    // Cleanup: if avatar is not a string (old MongoDB format), reset it
+    if (user.avatar && typeof user.avatar !== 'string') {
+      user.avatar = '';
+    }
+    
     const updated = await user.save();
     res.json({ user: updated, token: generateToken(updated._id) });
   } catch (err) {

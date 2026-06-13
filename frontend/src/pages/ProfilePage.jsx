@@ -11,7 +11,7 @@ export default function ProfilePage() {
   const [saving, setSaving] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
   const [avatarPreview, setAvatarPreview] = useState(
-    user?._id ? getAvatarUrl(user._id) : ''
+    user?.avatar && typeof user.avatar === 'string' ? getAvatarUrl(user.avatar) : ''
   );
   const fileRef = useRef();
 
@@ -46,13 +46,12 @@ export default function ProfilePage() {
       });
       // Update context so Navbar also reflects change immediately
       updateUser(data.user);
-      // Use the new avatar endpoint
       setAvatarPreview(getAvatarUrl(data.avatarUrl));
       toast.success('Profile picture updated!');
     } catch (err) {
       toast.error(err.response?.data?.message || 'Upload failed');
       // Revert preview on error
-      setAvatarPreview(user?._id ? getAvatarUrl(user._id) : '');
+      setAvatarPreview(user?.avatar && typeof user.avatar === 'string' ? getAvatarUrl(user.avatar) : '');
     } finally {
       setUploadingAvatar(false);
     }
@@ -107,12 +106,7 @@ export default function ProfilePage() {
                   src={avatarPreview}
                   alt={user?.name}
                   className="profile-avatar-img"
-                  onError={e => { 
-                    console.error('Avatar image failed to load from:', avatarPreview);
-                    e.target.onerror = null; 
-                    setAvatarPreview(''); 
-                  }}
-                  onLoad={() => console.log('Avatar loaded successfully from:', avatarPreview)}
+                  onError={e => { e.target.onerror = null; setAvatarPreview(''); }}
                 />
               ) : (
                 <div className="profile-avatar-initials">{initials}</div>
